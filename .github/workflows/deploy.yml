@@ -1,0 +1,49 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - main # Trigger only on pushes to the "main" branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # Use Node.js v20
+          cache: "yarn"
+
+      # Step 3: Install dependencies
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      # Step 4: Build the project
+      - name: Build Project
+        run: yarn build
+        env:
+          NEXT_PUBLIC_BASE_URL: "https://helpdesk.programming-hero.com/api/v1"
+          NEXT_PUBLIC_ENVIRONMENT: "stage"
+          NEXT_PUBLIC_PROVIDER_NAME: "Programming Hero"
+          NEXT_PUBLIC_API_BASE_URL_STAGE: "https://helpdesk-stg-api.jsdude.com/api/v1"
+          NEXT_PUBLIC_API_BASE_URL_PROD: "https://helpdesk-api.programming-hero.com/api/v1"
+          NEXT_PUBLIC_LOGIN_REDIRECT_URL_STAGE: "https://jsdude.com/login?ref=helpdesk"
+          NEXT_PUBLIC_LOGIN_REDIRECT_URL_PROD: "https://programming-hero.com/login?ref=helpdesk"
+          NEXT_PUBLIC_VERIFY_COOKIE_URL_STAGE: "https://jsdude.com/api/user/verify-cookie"
+          NEXT_PUBLIC_VERIFY_COOKIE_URL_PROD: "https://web.programming-hero.com/api/user/verify-cookie"
+
+      # Step 5: Deploy to Cloudflare Workers
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: yarn deploy:worker # Use Yarn script for deployment
