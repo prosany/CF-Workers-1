@@ -15,12 +15,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Install Node.js
+      # Step 2: Set up Node.js (and Yarn will be installed automatically)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20 # Use Node.js v20
-          cache: "yarn"
+          node-version: 20
+          cache: "yarn"  # This ensures Yarn is installed
 
       # Step 3: Install dependencies
       - name: Install Dependencies
@@ -42,8 +42,7 @@ jobs:
 
       # Step 5: Deploy to Cloudflare Workers
       - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: yarn deploy:worker # Use Yarn script for deployment
+        run: yarn deploy:worker  # Run the deploy script defined in package.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
